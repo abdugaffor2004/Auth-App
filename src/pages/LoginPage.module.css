@@ -1,0 +1,21 @@
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.form{
+    border-radius: 10px;
+    min-width: 400px;
+    padding: 35px 45px;
+    background-color: white;
+    
+    & .item:not(:last-child){
+        padding-bottom: 20px;
+    }
+
+    & .submitBtn{
+        outline: none;
+    }
+}
