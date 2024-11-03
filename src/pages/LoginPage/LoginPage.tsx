@@ -1,27 +1,34 @@
 import { Button, Group, PasswordInput, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import style from './LoginPage.module.css';
+import { useLocalStorage } from '@mantine/hooks';
+import { AuthenticateRequest } from '../../types';
 
-interface RequestData {
-  userName: string;
-  password: string;
+interface LoginPageProps {
+  authorize: (accessToken: string) => void;
+  authenticate: (payload: AuthenticateRequest) => void;
 }
 
-export const LoginPage: FC = () => {
+export const LoginPage: FC<LoginPageProps> = ({ authorize, authenticate }) => {
+  const [accessToken] = useLocalStorage({ key: 'accessToken', defaultValue: '' });
+
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
-      userName: '',
+      username: '',
       password: '',
     },
   });
 
-  const [requestData, setRequestData] = useState<null | RequestData>(null);
+  const handleSubmit = async (payload: AuthenticateRequest) => {
+    await authenticate(payload);
+    await authorize(accessToken);
+  };
 
   return (
     <div className={style.container}>
-      <form className={style.form} onSubmit={form.onSubmit(setRequestData)}>
+      <form className={style.form} onSubmit={form.onSubmit(handleSubmit)}>
         <Title size="h2" mb="lg">
           Log in
         </Title>
@@ -31,8 +38,8 @@ export const LoginPage: FC = () => {
           withAsterisk
           label="Username"
           placeholder="your@email.com"
-          key={form.key('userName')}
-          {...form.getInputProps('userName')}
+          key={form.key('username')}
+          {...form.getInputProps('username')}
         />
 
         <PasswordInput
