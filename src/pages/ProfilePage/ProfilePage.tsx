@@ -1,23 +1,26 @@
 import { FC } from 'react';
-import { User } from '../../types';
-import { Center, Flex, Image, Paper, Text, Title } from '@mantine/core';
+import { Badge, Center, Flex, Image, Loader, Paper, Text, Title } from '@mantine/core';
 import style from './ProfilePage.module.css';
+import { useAuth } from '../LoginPage/useAuth';
 
-interface ProfilePageProps {
-  user: User | null;
-  logout: () => void;
-}
+export const ProfilePage: FC = () => {
+  const { user, isUserLoading, logout } = useAuth();
 
-export const ProfilePage: FC<ProfilePageProps> = ({ user, logout }) => {
+  if (isUserLoading) {
+    return (
+      <Center style={{ height: '100vh' }}>
+        <Loader size="lg" />
+      </Center>
+    );
+  }
+
   return (
-    <>
-      <Flex my="md" mr="lg" justify="end">
-        <a style={{ cursor: 'pointer' }} onClick={logout}>
-          Log out
-        </a>
+    <div className={style.container}>
+      <Flex py="md" mr="lg" justify="end">
+        <a onClick={logout}>Log out</a>
       </Flex>
 
-      <Center h="60vh">
+      <Center mt="100px">
         <Flex mr="lg" align="center" direction="column">
           <Image w="180px" src={user?.image} alt="Avatar" />
           <Flex c="#3d3d3d" align="center">
@@ -30,7 +33,11 @@ export const ProfilePage: FC<ProfilePageProps> = ({ user, logout }) => {
 
         <Paper radius="15px" c="#3d3d3d" bg="#fff" className={style.paper}>
           <Flex direction="column">
-            <Title size="h3">Personal Info</Title>
+            <Flex align="center" justify="space-between">
+              <Title size="h3">Personal Info</Title>
+              <Badge size="md">{user?.role}</Badge>
+            </Flex>
+
             <Flex mt="28px" justify="space-between">
               <Flex direction="column">
                 <Text c="gray" mb="xs" size="16px">
@@ -56,6 +63,6 @@ export const ProfilePage: FC<ProfilePageProps> = ({ user, logout }) => {
           </Flex>
         </Paper>
       </Center>
-    </>
+    </div>
   );
 };

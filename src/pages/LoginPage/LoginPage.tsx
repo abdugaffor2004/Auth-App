@@ -1,34 +1,43 @@
-import { Button, Group, PasswordInput, TextInput, Title } from '@mantine/core';
+import {
+  Alert,
+  Button,
+  Center,
+  Group,
+  Loader,
+  PasswordInput,
+  TextInput,
+  Title,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { FC } from 'react';
 import style from './LoginPage.module.css';
-import { useLocalStorage } from '@mantine/hooks';
-import { AuthenticateRequest } from '../../types';
+import { useAuth } from './useAuth';
 
-interface LoginPageProps {
-  authorize: (accessToken: string) => void;
-  authenticate: (payload: AuthenticateRequest) => void;
-}
-
-export const LoginPage: FC<LoginPageProps> = ({ authorize, authenticate }) => {
-  const [accessToken] = useLocalStorage({ key: 'accessToken', defaultValue: '' });
-
+export const LoginPage: FC = () => {
+  const { login, authenticationError, isAuthenticationError, isUserLoading } = useAuth();
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
       username: '',
       password: '',
     },
+    validate: {
+      username: value => !value && 'Username is required',
+      password: value => !value && 'Password is required',
+    },
   });
 
-  const handleSubmit = async (payload: AuthenticateRequest) => {
-    await authenticate(payload);
-    await authorize(accessToken);
-  };
+  if (isUserLoading) {
+    return (
+      <Center style={{ height: '100vh' }}>
+        <Loader size="lg" />
+      </Center>
+    );
+  }
 
   return (
     <div className={style.container}>
-      <form className={style.form} onSubmit={form.onSubmit(handleSubmit)}>
+      <form className={style.form} onSubmit={form.onSubmit(formData => login(formData))}>
         <Title size="h2" mb="lg">
           Log in
         </Title>
@@ -37,7 +46,7 @@ export const LoginPage: FC<LoginPageProps> = ({ authorize, authenticate }) => {
           className={style.item}
           withAsterisk
           label="Username"
-          placeholder="your@email.com"
+          placeholder="emilys"
           key={form.key('username')}
           {...form.getInputProps('username')}
         />
@@ -46,7 +55,7 @@ export const LoginPage: FC<LoginPageProps> = ({ authorize, authenticate }) => {
           className={style.item}
           withAsterisk
           label="Password"
-          placeholder="1234"
+          placeholder="emylispass"
           key={form.key('password')}
           {...form.getInputProps('password')}
         />
@@ -57,6 +66,19 @@ export const LoginPage: FC<LoginPageProps> = ({ authorize, authenticate }) => {
           </Button>
         </Group>
       </form>
+
+      {isAuthenticationError && (
+        <>
+          <Alert
+            px="60px"
+            mt="md"
+            title={authenticationError?.message || 'An unknown error occurred'}
+            color="red"
+          >
+            Retry with correct credentials
+          </Alert>
+        </>
+      )}
     </div>
   );
 };

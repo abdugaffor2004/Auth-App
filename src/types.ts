@@ -5,7 +5,7 @@ export interface AuthenticateRequest {
 
 export interface AuthenticateResponse {
   accessToken: string;
-  refreshtoken: string;
+  refreshToken: string;
 }
 
 export interface User {
@@ -19,4 +19,6 @@ export interface User {
   username: string;
   gender: string;
   phone: string;
+  eyeColor: string;
+  role: string;
 }
