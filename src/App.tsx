@@ -1,21 +1,48 @@
 import { FC, useLayoutEffect } from 'react';
-import { Route, Routes, useNavigate } from 'react-router';
+import { Outlet, RouterProvider, useNavigate } from 'react-router';
+import { createBrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAuth } from './pages/LoginPage/useAuth';
 import { LoginPage } from './pages/LoginPage/LoginPage';
 import { ProfilePage } from './pages/ProfilePage/ProfilePage';
-import { useAuth } from './pages/LoginPage/useAuth';
+import { Center, Loader, MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
 
-export const App: FC = () => {
-  const { isAuth } = useAuth();
+const queryClient = new QueryClient();
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <AuthWrapper />,
+    children: [
+      { path: 'login', element: <LoginPage /> },
+      { path: 'main', element: <ProfilePage /> },
+    ],
+  },
+]);
+
+function AuthWrapper() {
+  const { isAuth, isUserLoading } = useAuth();
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
-    navigate(!isAuth ? '/login' : '/main', { replace: true });
+    navigate(isAuth ? '/main' : '/login', { replace: true });
   }, [isAuth, navigate]);
 
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/main" element={<ProfilePage />} />
-    </Routes>
-  );
-};
+  if (isUserLoading) {
+    return (
+      <Center style={{ height: '100vh' }}>
+        <Loader size="lg" />
+      </Center>
+    );
+  }
+
+  return <Outlet />;
+}
+
+export const App: FC = () => (
+  <QueryClientProvider client={queryClient}>
+    <MantineProvider>
+      <RouterProvider router={router} />
+    </MantineProvider>
+  </QueryClientProvider>
+);

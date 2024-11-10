@@ -1,20 +1,11 @@
-import {
-  Alert,
-  Button,
-  Center,
-  Group,
-  Loader,
-  PasswordInput,
-  TextInput,
-  Title,
-} from '@mantine/core';
-import { useForm } from '@mantine/form';
+import { Alert, Button, Group, PasswordInput, TextInput, Title } from '@mantine/core';
+import { isNotEmpty, useForm } from '@mantine/form';
 import { FC } from 'react';
 import style from './LoginPage.module.css';
 import { useAuth } from './useAuth';
 
 export const LoginPage: FC = () => {
-  const { login, authenticationError, isAuthenticationError, isUserLoading } = useAuth();
+  const { triggerLogin, authenticationError, isAuthenticationError, isAuthenticating } = useAuth();
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -22,22 +13,14 @@ export const LoginPage: FC = () => {
       password: '',
     },
     validate: {
-      username: value => !value && 'Username is required',
-      password: value => !value && 'Password is required',
+      username: isNotEmpty('Username is required'),
+      password: isNotEmpty('Password is required'),
     },
   });
 
-  if (isUserLoading) {
-    return (
-      <Center style={{ height: '100vh' }}>
-        <Loader size="lg" />
-      </Center>
-    );
-  }
-
   return (
     <div className={style.container}>
-      <form className={style.form} onSubmit={form.onSubmit(formData => login(formData))}>
+      <form className={style.form} onSubmit={form.onSubmit(formData => triggerLogin(formData))}>
         <Title size="h2" mb="lg">
           Log in
         </Title>
@@ -61,7 +44,7 @@ export const LoginPage: FC = () => {
         />
 
         <Group justify="flex-end" mt="md">
-          <Button className={style.submitBtn} type="submit">
+          <Button loading={isAuthenticating} className={style.submitBtn} type="submit">
             Submit
           </Button>
         </Group>

@@ -3,8 +3,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { authenticateUser, authorizeUser, refreshAccessToken } from '../../api/Auth';
-import { AuthenticateRequest } from '../../types';
+import { AuthenticateRequest, User } from '../../types';
+import { login } from '../../api/login';
+import { getCurrentUser } from '../../api/getCurrentUser';
+import { refresh } from '../../api/refresh';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -23,13 +25,14 @@ export const useAuth = () => {
   };
 
   const {
-    mutate: login,
+    mutate: triggerLogin,
     error: authenticationError,
     isError: isAuthenticationError,
+    isPending: isAuthenticating,
   } = useMutation({
     mutationKey: ['authentication'],
     mutationFn: async (payload: AuthenticateRequest) => {
-      const data = await authenticateUser(payload);
+      const data = await login(payload);
       setAccessToken(data.accessToken);
       setRefreshToken(data.refreshToken);
     },
@@ -44,15 +47,15 @@ export const useAuth = () => {
     data: user,
     refetch: refetchUser,
     isPending: isUserLoading,
-  } = useQuery({
+  } = useQuery<User | null>({
     queryKey: ['user', accessToken],
-    queryFn: async () => await authorizeUser(accessToken),
+    queryFn: async () => (accessToken ? await getCurrentUser(accessToken) : null),
     retry: false,
   });
 
-  const { mutate: refresh } = useMutation({
+  const { mutate: triggerRefresh } = useMutation({
     mutationKey: ['refreshToken'],
-    mutationFn: async () => await refreshAccessToken(refreshToken),
+    mutationFn: async () => await refresh(refreshToken),
     onSuccess: data => {
       setAccessToken(data.accessToken);
       setRefreshToken(data.refreshToken);
@@ -68,17 +71,18 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (accessToken && isTokenExpired(accessToken)) {
-      refresh();
+      triggerRefresh();
     }
-  }, [accessToken, refresh]);
+  }, [accessToken, triggerRefresh]);
 
   return {
     user,
     isAuth: !!user,
-    login,
+    triggerLogin,
     logout,
     isUserLoading,
     authenticationError,
     isAuthenticationError,
+    isAuthenticating,
   };
 };

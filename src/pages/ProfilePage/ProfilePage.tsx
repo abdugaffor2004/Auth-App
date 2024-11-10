@@ -1,18 +1,10 @@
 import { FC } from 'react';
-import { Badge, Center, Flex, Image, Loader, Paper, Text, Title } from '@mantine/core';
+import { Badge, Center, Flex, Image, Paper, Text, Title } from '@mantine/core';
 import style from './ProfilePage.module.css';
 import { useAuth } from '../LoginPage/useAuth';
 
 export const ProfilePage: FC = () => {
-  const { user, isUserLoading, logout } = useAuth();
-
-  if (isUserLoading) {
-    return (
-      <Center style={{ height: '100vh' }}>
-        <Loader size="lg" />
-      </Center>
-    );
-  }
+  const { user, logout } = useAuth();
 
   return (
     <div className={style.container}>
