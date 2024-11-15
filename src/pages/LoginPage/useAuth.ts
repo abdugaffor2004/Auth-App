@@ -1,4 +1,3 @@
-import { useLocalStorage } from '@mantine/hooks';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect } from 'react';
@@ -7,17 +6,16 @@ import { AuthenticateRequest, User } from '../../types';
 import { login } from '../../api/login';
 import { getCurrentUser } from '../../api/getCurrentUser';
 import { refresh } from '../../api/refresh';
+import {
+  clearTokens,
+  getAccessToken,
+  setAccessToken,
+  setRefeshToken,
+} from '../../lib/storage/tokens';
 
 export const useAuth = () => {
   const navigate = useNavigate();
-  const [accessToken, setAccessToken] = useLocalStorage<string | null>({
-    key: 'accessToken',
-    defaultValue: null,
-  });
-  const [refreshToken, setRefreshToken] = useLocalStorage<string | null>({
-    key: 'refreshToken',
-    defaultValue: null,
-  });
+  const accessToken = getAccessToken();
 
   const isTokenExpired = (token: string) => {
     const { exp } = jwtDecode<{ exp: number }>(token);
@@ -34,7 +32,7 @@ export const useAuth = () => {
     mutationFn: async (payload: AuthenticateRequest) => {
       const data = await login(payload);
       setAccessToken(data.accessToken);
-      setRefreshToken(data.refreshToken);
+      setRefeshToken(data.refreshToken);
     },
 
     onSuccess: async () => {
@@ -49,28 +47,27 @@ export const useAuth = () => {
     isPending: isUserLoading,
   } = useQuery<User | null>({
     queryKey: ['user', accessToken],
-    queryFn: async () => (accessToken ? await getCurrentUser(accessToken) : null),
+    queryFn: async () => (accessToken ? await getCurrentUser() : null),
     retry: false,
   });
 
   const { mutate: triggerRefresh } = useMutation({
     mutationKey: ['refreshToken'],
-    mutationFn: async () => await refresh(refreshToken),
+    mutationFn: async () => await refresh(),
     onSuccess: data => {
       setAccessToken(data.accessToken);
-      setRefreshToken(data.refreshToken);
+      setRefeshToken(data.refreshToken);
     },
     onError: () => logout(),
   });
 
   const logout = () => {
-    setAccessToken(null);
-    setRefreshToken(null);
+    clearTokens();
     navigate('/login', { replace: true });
   };
 
   useEffect(() => {
-    if (accessToken && isTokenExpired(accessToken)) {
+    if (accessToken && isTokenExpired(accessToken || '')) {
       triggerRefresh();
     }
   }, [accessToken, triggerRefresh]);

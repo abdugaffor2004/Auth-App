@@ -7,5 +7,5 @@ export const login = async (payload: AuthenticateRequest): Promise<AuthenticateR
     body: JSON.stringify(payload),
   });
   if (!response.ok) throw new Error('Invalid password or username');
-  return await response.json();
+  return response.json();
 };
