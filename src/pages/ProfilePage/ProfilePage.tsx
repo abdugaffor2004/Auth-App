@@ -4,20 +4,15 @@ import style from './ProfilePage.module.css';
 import { useAuth } from '../LoginPage/useAuth';
 import { User } from '../../types';
 
-const defaultUser: User = {
-  username: 'Unknown User',
-  age: null,
-  image: 'https://placehold.co/600x400/png',
-};
-
-const getUserData = (user?: User | null): User => ({
-  ...defaultUser,
-  ...user,
-});
+function assertUser(user: unknown): asserts user is User {
+  if (!user) {
+    throw new Error('User is required but was not provided');
+  }
+}
 
 export const ProfilePage: FC = () => {
   const { user, logout } = useAuth();
-  const { username, age, image, role, firstName, lastName, email, phone } = getUserData(user);
+  assertUser(user);
 
   return (
     <div className={style.container}>
@@ -27,11 +22,11 @@ export const ProfilePage: FC = () => {
 
       <Center mt="100px">
         <Flex mr="lg" align="center" direction="column">
-          <Image w="180px" src={image} alt="Avatar" />
+          <Image w="180px" src={user.image} alt="Avatar" />
           <Flex c="#3d3d3d" align="center">
-            <Title size="h2">{username}</Title>
+            <Title size="h2">{user.username}</Title>
             <Text ml="8px" size="24px">
-              • {age} y.o.
+              • {user.age} y.o.
             </Text>
           </Flex>
         </Flex>
@@ -40,7 +35,7 @@ export const ProfilePage: FC = () => {
           <Flex direction="column">
             <Flex align="center" justify="space-between">
               <Title size="h3">Personal Info</Title>
-              <Badge size="md">{role}</Badge>
+              <Badge size="md">{user.role}</Badge>
             </Flex>
 
             <Flex mt="28px" justify="space-between">
@@ -49,20 +44,20 @@ export const ProfilePage: FC = () => {
                   Full Name
                 </Text>
                 <Title size="h6">
-                  {firstName} {lastName}
+                  {user.firstName} {user.lastName}
                 </Title>
               </Flex>
               <Flex direction="column">
                 <Text c="gray" mb="xs" size="16px">
                   Email
                 </Text>
-                <Title size="h6">{email} </Title>
+                <Title size="h6">{user.email} </Title>
               </Flex>
               <Flex direction="column">
                 <Text c="gray" mb="xs" size="16px">
                   Phone
                 </Text>
-                <Title size="h6">{phone} </Title>
+                <Title size="h6">{user.phone} </Title>
               </Flex>
             </Flex>
           </Flex>

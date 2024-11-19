@@ -10,12 +10,12 @@ export interface AuthenticateResponse {
 
 export interface User {
   id?: number;
-  age: number | null;
+  age?: number | null;
   birthDate?: string;
   email?: string;
   firstName?: string;
   lastName?: string;
-  image: string;
+  image?: string;
   username: string;
   gender?: string;
   phone?: string;
