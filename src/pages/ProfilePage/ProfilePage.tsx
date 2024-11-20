@@ -2,17 +2,11 @@ import { FC } from 'react';
 import { Badge, Center, Flex, Image, Paper, Text, Title } from '@mantine/core';
 import style from './ProfilePage.module.css';
 import { useAuth } from '../LoginPage/useAuth';
-import { User } from '../../types';
-
-function assertUser(user: unknown): asserts user is User {
-  if (!user) {
-    throw new Error('User is required but was not provided');
-  }
-}
+import { assert } from '../../lib/assert';
 
 export const ProfilePage: FC = () => {
   const { user, logout } = useAuth();
-  assertUser(user);
+  assert(!!user, 'User is required but was not provided');
 
   return (
     <div className={style.container}>

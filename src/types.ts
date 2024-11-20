@@ -10,7 +10,7 @@ export interface AuthenticateResponse {
 
 export interface User {
   id?: number;
-  age?: number | null;
+  age?: number;
   birthDate?: string;
   email?: string;
   firstName?: string;
