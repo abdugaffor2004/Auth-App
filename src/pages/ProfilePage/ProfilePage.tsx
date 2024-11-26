@@ -6,7 +6,8 @@ import { assert } from '../../lib/assert';
 
 export const ProfilePage: FC = () => {
   const { user, logout } = useAuth();
-  assert(!!user, 'User is required but was not provided');
+  const isUserProvided = user !== null && user !== undefined;
+  assert(isUserProvided, 'User is required but was not provided');
 
   return (
     <div className={style.container}>
