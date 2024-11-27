@@ -1,0 +1,15 @@
+.container {
+  background: #f2f3fa;
+  height: 100vh;
+}
+
+.paper {
+  border-radius: 10px;
+  min-width: 600px;
+  padding: 25px 35px;
+  background-color: white;
+}
+
+a {
+  cursor: pointer;
+}
